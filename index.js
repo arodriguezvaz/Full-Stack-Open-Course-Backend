@@ -24,6 +24,8 @@ let people = [
 	},
 ];
 
+app.use(express.json());
+
 app.get("/", (request, response) => {
 	response.send("<h1>Wellcome to the phonebook</h1>");
 });
@@ -54,6 +56,30 @@ app.delete("/api/people/:id", (request, response) => {
 	const id = Number(request.params.id);
 	people = people.filter((person) => person.id !== id);
 	response.status(204).end();
+});
+
+app.post("/api/people", (request, response) => {
+	const body = request.body;
+
+	if (!body.name || !body.number) {
+		return response.status(400).json({
+			error: "information missing",
+		});
+	}
+	if (people.find((p) => p.name === body.name)) {
+		return response.status(400).json({
+			error: "name must be unique",
+		});
+	}
+	const id = Math.floor(Math.random() * 1000000);
+	const person = {
+		id: id,
+		name: body.name,
+		number: body.number,
+	};
+	people = people.concat(person);
+
+	response.json(person);
 });
 
 const PORT = 3001;
